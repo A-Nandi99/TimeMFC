@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>In-Game Week Timer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    label { display: block; margin-top: 10px; }
+    input, select { margin-top: 5px; padding: 5px; }
+    button { margin-top: 15px; padding: 8px 12px; }
+    .hint { color: #555; font-size: 0.9em; }
+    .result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>In-Game Week → Real Time Converter</h1>
+
+  <p class="hint">
+    Assumption: “In-game weeks” includes the current partial week. Real time = (weeks − 1) × 30 + remaining.
+    If weeks = 0, total = remaining.
+  </p>
+
+  <label>
+    Timezone:
+    <select id="timezone">
+      <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+      <option value="UTC">UTC</option>
+      <option value="America/New_York">America/New_York (ET)</option>
+      <option value="Europe/London">Europe/London (UK)</option>
+      <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+    </select>
+  </label>
+
+  <label>
+    In-game weeks (including current week):
+    <input type="number" id="weeks" min="0" value="2">
+  </label>
+
+  <label>
+    Time remaining in current week (minutes, IRL):
+    <input type="number" id="remaining" min="0" max="30" value="20">
+  </label>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="result" id="output"></div>
+
+  <script>
+    function calculate() {
+      const weeks = parseInt(document.getElementById('weeks').value) || 0;
+      const remaining = parseInt(document.getElementById('remaining').value) || 0;
+      const tz = document.getElementById('timezone').value;
+
+      // Validate remaining bound to [0, 30]
+      const rem = Math.max(0, Math.min(30, remaining));
+
+      // 1 in-game week = 30 minutes IRL
+      const fullFutureWeeks = Math.max(weeks - 1, 0);
+      const totalMinutes = fullFutureWeeks * 30 + rem;
+
+      const now = new Date();
+      const endTime = new Date(now.getTime() + totalMinutes * 60000);
+
+      const options = {
+        timeZone: tz,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      };
+      const localTime = endTime.toLocaleString([], options);
+
+      document.getElementById('output').innerHTML =
+        `Real time required: ${totalMinutes} minutes<br>
+         Ends at local time (${tz}): ${localTime}`;
+    }
+  </script>
+</body>
+</html>
